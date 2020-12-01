@@ -1,17 +1,18 @@
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use itertools::Itertools;
 use std::io::{self, BufRead};
 
-const VALUE: u32 = 2020;
+const SEARCH_VALUE: u32 = 2020;
 
-fn solve(size: usize, data: &[u32]) -> u32 {
-    let entries = data
+fn solve(size: usize, input: &[u32]) -> Result<u32> {
+    let entries = input
         .iter()
         .combinations(size)
-        .find(|entries| entries.iter().cloned().sum::<u32>() == VALUE)
-        .unwrap();
+        .find(|entries| entries.iter().copied().sum::<u32>() == SEARCH_VALUE)
+        .ok_or_else(|| anyhow!("Unable to find solution"))?;
 
-    entries.iter().cloned().product::<u32>()
+    let solution = entries.iter().copied().product();
+    Ok(solution)
 }
 
 fn main() -> Result<()> {
@@ -22,8 +23,8 @@ fn main() -> Result<()> {
         .map(|line| line.and_then(|n| n.parse().context("Failed to parse number")))
         .collect::<Result<Vec<u32>>>()?;
 
-    println!("Part 1: {}", solve(2, &input));
-    println!("Part 2: {}", solve(3, &input));
+    println!("Part 1: {}", solve(2, &input)?);
+    println!("Part 2: {}", solve(3, &input)?);
 
     Ok(())
 }

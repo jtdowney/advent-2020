@@ -2,6 +2,8 @@ use lazy_static::lazy_static;
 use std::collections::{HashMap, HashSet};
 use std::io::{self, Read};
 
+type Passport<'a> = HashMap<&'a str, &'a str>;
+
 lazy_static! {
     static ref REQUIRED_KEYS: HashSet<&'static str> = {
         ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
@@ -17,36 +19,33 @@ lazy_static! {
     };
 }
 
-fn part1_validator(entry: &HashMap<&str, &str>) -> bool {
-    let keys = entry.keys().copied().collect::<HashSet<&str>>();
+fn validate_year(year: &str, minimum: u16, maximum: u16) -> bool {
+    year.parse::<u16>()
+        .map(|n| n >= minimum && n <= maximum)
+        .unwrap_or_default()
+}
+
+fn part1_validator(passport: &Passport) -> bool {
+    let keys = passport.keys().copied().collect::<HashSet<&str>>();
     REQUIRED_KEYS.is_subset(&keys)
 }
 
-fn part2_validator(entry: &HashMap<&str, &str>) -> bool {
+fn part2_validator(passport: &Passport) -> bool {
     REQUIRED_KEYS.iter().all(|&key| {
-        entry
+        passport
             .get(key)
             .map(|value| match key {
-                "byr" => value
-                    .parse::<u16>()
-                    .map(|n| n >= 1920 && n <= 2002)
-                    .unwrap_or_default(),
-                "iyr" => value
-                    .parse::<u16>()
-                    .map(|n| n >= 2010 && n <= 2020)
-                    .unwrap_or_default(),
-                "eyr" => value
-                    .parse::<u16>()
-                    .map(|n| n >= 2020 && n <= 2030)
-                    .unwrap_or_default(),
+                "byr" => validate_year(value, 1920, 2002),
+                "iyr" => validate_year(value, 2010, 2020),
+                "eyr" => validate_year(value, 2020, 2030),
                 "hgt" => {
                     let position = value.bytes().position(|b| !b.is_ascii_digit());
                     if let Some(index) = position {
                         let (amount, unit) = value.split_at(index);
                         let amount = amount.parse::<u16>();
                         match (unit, amount) {
-                            ("cm", Ok(v)) if v >= 150 && v <= 193 => true,
-                            ("in", Ok(v)) if v >= 59 && v <= 76 => true,
+                            ("cm", Ok(v)) => v >= 150 && v <= 193,
+                            ("in", Ok(v)) => v >= 59 && v <= 76,
                             _ => false,
                         }
                     } else {
@@ -75,11 +74,14 @@ fn part2_validator(entry: &HashMap<&str, &str>) -> bool {
     })
 }
 
-fn solve<F>(entries: &[HashMap<&str, &str>], validator: F) -> usize
+fn solve<F>(passports: &[Passport], validator: F) -> usize
 where
-    F: Fn(&HashMap<&str, &str>) -> bool,
+    F: Fn(&Passport) -> bool,
 {
-    entries.iter().filter(|entry| validator(entry)).count()
+    passports
+        .iter()
+        .filter(|passport| validator(passport))
+        .count()
 }
 
 fn main() {
@@ -92,7 +94,7 @@ fn main() {
         .map(|row| {
             row.trim()
                 .split_whitespace()
-                .fold(HashMap::new(), |mut acc, part| {
+                .fold(Passport::new(), |mut acc, part| {
                     let mut values = part.split(':');
                     let key = values.next().expect("key");
                     let value = values.next().expect("value");
@@ -100,7 +102,7 @@ fn main() {
                     acc
                 })
         })
-        .collect::<Vec<HashMap<&str, &str>>>();
+        .collect::<Vec<Passport>>();
 
     println!("Part 1: {}", solve(&entries, part1_validator));
     println!("Part 2: {}", solve(&entries, part2_validator));

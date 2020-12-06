@@ -1,4 +1,4 @@
-use std::io::{self, Read};
+use std::io::{self, BufRead};
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -41,14 +41,14 @@ fn part2(passes: &[BoardingPass]) {
 }
 
 fn main() {
-    let mut input = String::new();
-    io::stdin()
-        .read_to_string(&mut input)
-        .expect("Unable to read input");
-
-    let seat_ids = input
+    let seat_ids = io::stdin()
+        .lock()
         .lines()
-        .map(|line| line.parse().expect("Invalid boarding pass"))
+        .map(|line| {
+            line.expect("Unable to read line")
+                .parse()
+                .expect("Invalid boarding pass")
+        })
         .collect::<Vec<BoardingPass>>();
 
     part1(&seat_ids);

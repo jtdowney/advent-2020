@@ -1,60 +1,42 @@
 use std::io::{self, Read};
+use std::num::ParseIntError;
 use std::str::FromStr;
 
-#[derive(Debug)]
-struct BoardingPass(usize, usize);
-
-impl BoardingPass {
-    fn seat_id(&self) -> usize {
-        let BoardingPass(r, c) = self;
-        r * 8 + c
-    }
-}
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+struct BoardingPass(u16);
 
 impl FromStr for BoardingPass {
-    type Err = ();
+    type Err = ParseIntError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let ((_, rh), (_, ch)) = s
+        let id = s
             .chars()
-            .fold(((0, 127), (0, 7)), |((rl, rh), (cl, ch)), c| match c {
-                'F' => {
-                    let mid = (rl + rh) / 2;
-                    ((rl, mid), (cl, ch))
-                }
-                'B' => {
-                    let mid = (rl + rh) / 2;
-                    ((mid, rh), (cl, ch))
-                }
-                'R' => {
-                    let mid = (cl + ch) / 2;
-                    ((rl, rh), (mid, ch))
-                }
-                'L' => {
-                    let mid = (cl + ch) / 2;
-                    ((rl, rh), (cl, mid))
-                }
+            .map(|ch| match ch {
+                'F' => '0',
+                'B' => '1',
+                'L' => '0',
+                'R' => '1',
                 _ => unreachable!(),
-            });
-
-        Ok(BoardingPass(rh, ch))
+            })
+            .collect::<String>();
+        u16::from_str_radix(&id, 2).map(BoardingPass)
     }
 }
 
-fn part1(seat_ids: &[usize]) {
-    let answer = seat_ids.iter().max().expect("No max seat");
-    println!("Part 1: {}", answer);
+fn part1(passes: &[BoardingPass]) {
+    let answer = passes.iter().max().expect("No max seat");
+    println!("Part 1: {}", answer.0);
 }
 
-fn part2(seat_ids: &[usize]) {
-    let mut seat_ids = seat_ids.to_vec();
-    seat_ids.sort_unstable();
+fn part2(passes: &[BoardingPass]) {
+    let mut passes = passes.to_vec();
+    passes.sort_unstable();
 
-    let seats = seat_ids
+    let neighbors = passes
         .windows(2)
-        .find(|parts| parts[1] - parts[0] != 1)
+        .find(|parts| parts[1].0 - parts[0].0 == 2)
         .expect("No empty seat");
-    let answer = seats[0] + 1;
+    let answer = neighbors[0].0 + 1;
     println!("Part 2: {}", answer);
 }
 
@@ -66,9 +48,8 @@ fn main() {
 
     let seat_ids = input
         .lines()
-        .map(|line| line.parse::<BoardingPass>().expect("Invalid boarding pass"))
-        .map(|pass| pass.seat_id())
-        .collect::<Vec<usize>>();
+        .map(|line| line.parse().expect("Invalid boarding pass"))
+        .collect::<Vec<BoardingPass>>();
 
     part1(&seat_ids);
     part2(&seat_ids);

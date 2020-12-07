@@ -4,7 +4,7 @@ use std::io::Read;
 
 const SEARCH: &str = "shiny gold";
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 struct Rule<'a> {
     count: usize,
     name: &'a str,
@@ -41,8 +41,9 @@ fn part2(rules: &HashMap<&str, Vec<Rule>>) {
 
     while let Some((n, entry)) = search.pop_front() {
         for rule in &rules[entry] {
-            count += n * rule.count;
-            search.push_back((n * rule.count, rule.name));
+            let weight = n * rule.count;
+            count += weight;
+            search.push_back((weight, rule.name));
         }
     }
 

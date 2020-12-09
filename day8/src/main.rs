@@ -53,7 +53,7 @@ impl FromStr for Operation {
             argument,
         };
 
-        Ok(O)
+        Ok(operation)
     }
 }
 
@@ -107,7 +107,7 @@ fn part2(operations: &[Operation]) {
     for candidate in candidates {
         let mut accumulator = 0;
         let mut ip = 0;
-        let mut count = vec![0; candidate.len()];
+        let mut count = vec![0u8; candidate.len()];
         loop {
             let op = candidate[ip];
             count[ip] += 1;

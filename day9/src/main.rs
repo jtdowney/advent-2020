@@ -8,21 +8,23 @@ const PREAMBLE_SIZE: usize = 25;
 fn part1(input: &[u64]) -> u64 {
     let answer = input
         .windows(PREAMBLE_SIZE + 1)
-        .find(|window| {
-            let candidates = &window[0..PREAMBLE_SIZE];
+        .find_map(|window| {
             let sum = window[PREAMBLE_SIZE];
-
-            !candidates
+            let found = window[0..PREAMBLE_SIZE]
                 .iter()
                 .combinations(2)
-                .any(|numbers| numbers.iter().copied().sum::<u64>() == sum)
+                .any(|numbers| numbers.iter().copied().sum::<u64>() == sum);
+            if found {
+                None
+            } else {
+                Some(sum)
+            }
         })
         .expect("answer");
-    let missing = answer[PREAMBLE_SIZE];
 
-    println!("Part 1: {}", missing);
+    println!("Part 1: {}", answer);
 
-    missing
+    answer
 }
 
 fn part2(input: &[u64], sum: u64) {

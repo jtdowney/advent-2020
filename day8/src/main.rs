@@ -6,7 +6,13 @@ use std::{
 
 use anyhow::{anyhow, bail, Context, Result};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Default)]
+struct Environment {
+    accumulator: i64,
+    ip: usize,
+}
+
+#[derive(Copy, Clone, PartialEq)]
 enum Instruction {
     Increment,
     NoOperation,
@@ -28,10 +34,30 @@ impl FromStr for Instruction {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 struct Operation {
     instruction: Instruction,
     argument: i16,
+}
+
+impl Operation {
+    fn step(&self, mut env: Environment) -> Environment {
+        match self.instruction {
+            Instruction::Increment => {
+                env.accumulator += self.argument as i64;
+            }
+            Instruction::NoOperation => {}
+            Instruction::Jump => {
+                env.ip = (env.ip as i16 + self.argument) as usize;
+            }
+        };
+
+        if self.instruction != Instruction::Jump {
+            env.ip += 1;
+        }
+
+        env
+    }
 }
 
 impl FromStr for Operation {
@@ -58,33 +84,20 @@ impl FromStr for Operation {
 }
 
 fn part1(operations: &[Operation]) {
-    let mut accumulator = 0;
-    let mut ip = 0;
+    let mut env = Environment::default();
     let mut seen = HashSet::new();
     loop {
-        let op = operations[ip];
-        if seen.contains(&ip) {
+        if seen.contains(&env.ip) {
             break;
         } else {
-            seen.insert(ip);
+            seen.insert(env.ip);
         }
 
-        match op.instruction {
-            Instruction::Increment => {
-                accumulator += op.argument;
-            }
-            Instruction::NoOperation => {}
-            Instruction::Jump => {
-                ip = (ip as i16 + op.argument) as usize;
-            }
-        };
-
-        if op.instruction != Instruction::Jump {
-            ip += 1;
-        }
+        let op = operations[env.ip];
+        env = op.step(env);
     }
 
-    println!("Part 1: {}", accumulator);
+    println!("Part 1: {}", env.accumulator);
 }
 
 fn part2(operations: &[Operation]) {
@@ -104,33 +117,20 @@ fn part2(operations: &[Operation]) {
         })
         .collect::<Vec<Vec<Operation>>>();
 
-    for candidate in candidates {
-        let mut accumulator = 0;
-        let mut ip = 0;
-        let mut count = vec![0u8; candidate.len()];
+    for operations in candidates {
+        let mut env = Environment::default();
+        let mut count = vec![0u8; operations.len()];
         loop {
-            let op = candidate[ip];
-            count[ip] += 1;
-            if count[ip] > 25 {
+            count[env.ip] += 1;
+            if count[env.ip] > 25 {
                 break;
             }
 
-            match op.instruction {
-                Instruction::Increment => {
-                    accumulator += op.argument as i64;
-                }
-                Instruction::NoOperation => {}
-                Instruction::Jump => {
-                    ip = (ip as i16 + op.argument) as usize;
-                }
-            };
+            let op = operations[env.ip];
+            env = op.step(env);
 
-            if op.instruction != Instruction::Jump {
-                ip += 1;
-            }
-
-            if ip >= candidate.len() {
-                println!("Part 2: {}", accumulator);
+            if env.ip >= operations.len() {
+                println!("Part 2: {}", env.accumulator);
                 return;
             }
         }

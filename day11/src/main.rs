@@ -26,6 +26,8 @@ enum Seat {
 #[derive(Debug, Clone, PartialEq)]
 struct SeatingArea {
     seats: HashMap<Point, Seat>,
+    width: isize,
+    height: isize,
 }
 
 impl SeatingArea {
@@ -43,15 +45,14 @@ impl SeatingArea {
     }
 
     fn count_occupied_line_of_sight_neighbors(&self, (x, y): Point) -> usize {
-        let width = self.seats.keys().map(|&(x, _)| x).max().unwrap();
-        let height = self.seats.keys().map(|&(_, y)| y).max().unwrap();
-
         NEIGHBORS
             .iter()
             .filter_map(|&(dx, dy)| {
                 let neighbor = (x + dx, y + dy);
                 iter::successors(Some(neighbor), |(nx, ny)| Some((nx + dx, ny + dy)))
-                    .take_while(|&(nx, ny)| nx >= 0 && nx <= width && ny >= 0 && ny <= height)
+                    .take_while(|&(nx, ny)| {
+                        nx >= 0 && nx <= self.width && ny >= 0 && ny <= self.height
+                    })
                     .find_map(|n| self.seats.get(&n))
             })
             .filter(|&seat| *seat == Seat::Occupied)
@@ -73,7 +74,7 @@ impl SeatingArea {
             })
             .collect();
 
-        SeatingArea { seats }
+        SeatingArea { seats, ..*self }
     }
 
     fn step_line_of_sight(&self) -> Self {
@@ -91,7 +92,7 @@ impl SeatingArea {
             })
             .collect();
 
-        SeatingArea { seats }
+        SeatingArea { seats, ..*self }
     }
 }
 
@@ -128,7 +129,13 @@ fn main() {
         })
         .collect::<HashMap<Point, Seat>>();
 
-    let area = SeatingArea { seats };
+    let width = seats.keys().map(|&(x, _)| x).max().unwrap();
+    let height = seats.keys().map(|&(_, y)| y).max().unwrap();
+    let area = SeatingArea {
+        seats,
+        width,
+        height,
+    };
 
     println!(
         "Part 1: {}",

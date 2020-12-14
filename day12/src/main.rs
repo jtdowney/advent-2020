@@ -65,22 +65,6 @@ impl Add<Instruction> for Point {
     }
 }
 
-impl Add<Instruction> for (Point, Point) {
-    type Output = (Point, Point);
-
-    fn add(self, rhs: Instruction) -> Self::Output {
-        let (ship, direction) = self;
-        let Point(sx, sy) = ship;
-        let Point(dx, dy) = direction;
-        match rhs {
-            Instruction(Action::Left, arg) => (ship, direction.rotate(-arg)),
-            Instruction(Action::Right, arg) => (ship, direction.rotate(arg)),
-            Instruction(Action::Forward, arg) => (Point(sx + dx * arg, sy + dy * arg), direction),
-            _ => unimplemented!(),
-        }
-    }
-}
-
 impl Point {
     fn rotate(&self, degrees: i32) -> Point {
         let Point(x, y) = *self;
@@ -94,34 +78,80 @@ impl Point {
     }
 }
 
-fn part1(input: &[Instruction]) {
-    let state = (Point(0, 0), Point(1, 0));
-    let (Point(x, y), _) =
-        input
-            .iter()
-            .fold(state, |(ship, direction), &instruction| match instruction {
-                Instruction(Action::Left, _)
-                | Instruction(Action::Right, _)
-                | Instruction(Action::Forward, _) => (ship, direction) + instruction,
-                _ => (ship + instruction, direction),
-            });
+#[derive(Copy, Clone)]
+struct Ship {
+    position: Point,
+    direction: Point,
+}
 
+impl Add<Instruction> for Ship {
+    type Output = Ship;
+
+    fn add(self, rhs: Instruction) -> Self::Output {
+        match rhs {
+            Instruction(Action::Left, arg) => Ship {
+                direction: self.direction.rotate(-arg),
+                ..self
+            },
+            Instruction(Action::Right, arg) => Ship {
+                direction: self.direction.rotate(arg),
+                ..self
+            },
+            Instruction(Action::Forward, arg) => {
+                let Point(px, py) = self.position;
+                let Point(dx, dy) = self.direction;
+                Ship {
+                    position: Point(px + dx * arg, py + dy * arg),
+                    ..self
+                }
+            }
+            _ => unimplemented!(),
+        }
+    }
+}
+
+fn part1(input: &[Instruction]) {
+    let state = Ship {
+        position: Point(0, 0),
+        direction: Point(1, 0),
+    };
+
+    let ship = input
+        .iter()
+        .fold(state, |ship, &instruction| match instruction {
+            Instruction(Action::Left, _)
+            | Instruction(Action::Right, _)
+            | Instruction(Action::Forward, _) => ship + instruction,
+            _ => Ship {
+                position: ship.position + instruction,
+                ..ship
+            },
+        });
+
+    let Point(x, y) = ship.position;
     let answer = x.abs() + y.abs();
     println!("Part 1: {}", answer);
 }
 
 fn part2(input: &[Instruction]) {
-    let state = (Point(0, 0), Point(10, -1));
-    let (Point(x, y), _) =
-        input
-            .iter()
-            .fold(state, |(ship, waypoint), &instruction| match instruction {
-                Instruction(Action::Left, _)
-                | Instruction(Action::Right, _)
-                | Instruction(Action::Forward, _) => (ship, waypoint) + instruction,
-                _ => (ship, waypoint + instruction),
-            });
+    let state = Ship {
+        position: Point(0, 0),
+        direction: Point(10, -1),
+    };
 
+    let ship = input
+        .iter()
+        .fold(state, |ship, &instruction| match instruction {
+            Instruction(Action::Left, _)
+            | Instruction(Action::Right, _)
+            | Instruction(Action::Forward, _) => ship + instruction,
+            _ => Ship {
+                direction: ship.direction + instruction,
+                ..ship
+            },
+        });
+
+    let Point(x, y) = ship.position;
     let answer = x.abs() + y.abs();
     println!("Part 2: {}", answer);
 }

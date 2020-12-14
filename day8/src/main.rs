@@ -1,8 +1,4 @@
-use std::{
-    collections::HashSet,
-    io::{self, BufRead},
-    str::FromStr,
-};
+use std::{collections::HashSet, str::FromStr};
 
 use anyhow::{anyhow, bail, Context, Result};
 
@@ -138,13 +134,9 @@ fn part2(operations: &[Operation]) {
 }
 
 fn main() -> Result<()> {
-    let operations = io::stdin()
-        .lock()
+    let operations = include_str!("../input.txt")
         .lines()
-        .map(|line| {
-            line.context("Failed to read line")
-                .and_then(|op| op.parse())
-        })
+        .map(str::parse)
         .collect::<Result<Vec<Operation>>>()?;
 
     part1(&operations);

@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    io::{self, BufRead},
-};
+use std::collections::HashMap;
 
 use anyhow::{Context, Result};
 
@@ -53,13 +50,9 @@ fn part2(input: &[usize]) {
 }
 
 fn main() -> Result<()> {
-    let mut input = io::stdin()
-        .lock()
+    let mut input = include_str!("../input.txt")
         .lines()
-        .map(|line| {
-            line.context("unable to read line")
-                .and_then(|n| n.parse().context("unable to parse line"))
-        })
+        .map(|line| line.parse().context("unable to parse line"))
         .collect::<Result<Vec<usize>>>()?;
     input.sort_unstable();
 

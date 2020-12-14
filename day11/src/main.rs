@@ -1,8 +1,4 @@
-use std::{
-    collections::HashMap,
-    io::{self, BufRead},
-    iter,
-};
+use std::{collections::HashMap, iter};
 
 type Point = (isize, isize);
 
@@ -115,13 +111,11 @@ where
 }
 
 fn main() {
-    let seats = io::stdin()
-        .lock()
+    let seats = include_str!("../input.txt")
         .lines()
         .enumerate()
         .flat_map(|(y, line)| {
-            line.expect("Unable to read line")
-                .chars()
+            line.chars()
                 .enumerate()
                 .filter(|&(_, ch)| ch != '.')
                 .map(|(x, _)| ((x as isize, y as isize), Seat::Empty))

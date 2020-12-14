@@ -1,5 +1,3 @@
-use std::io::{self, BufRead};
-
 use anyhow::{Context, Result};
 use itertools::Itertools;
 
@@ -39,13 +37,9 @@ fn part2(input: &[u64], sum: u64) {
 }
 
 fn main() -> Result<()> {
-    let input = io::stdin()
-        .lock()
+    let input = include_str!("../input.txt")
         .lines()
-        .map(|line| {
-            line.context("unable to read line")
-                .and_then(|l| l.parse().context("unable to parse line"))
-        })
+        .map(|line| line.parse().context("unable to parse line"))
         .collect::<Result<Vec<u64>>>()?;
 
     let part1 = part1(&input);

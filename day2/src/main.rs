@@ -1,6 +1,5 @@
 use anyhow::{anyhow, Context, Result};
 use regex::Regex;
-use std::io::{self, BufRead};
 
 type PasswordRule = (usize, usize, char);
 struct Entry {
@@ -33,22 +32,19 @@ where
 
 fn main() -> Result<()> {
     let re = Regex::new(r"(\d+)-(\d+) (\w): (\w+)").context("Regex build failed")?;
-    let input = io::stdin()
-        .lock()
+    let input = include_str!("../input.txt")
         .lines()
         .map(|line| {
-            line.context("Failed to read line").and_then(|entry| {
-                let captures = re
-                    .captures(&entry)
-                    .ok_or_else(|| anyhow!("Regex match failed"))?;
-                let a = captures[1].parse()?;
-                let b = captures[2].parse()?;
-                let letter = captures[3].chars().next().unwrap();
-                let password = captures[4].to_string();
-                let rule = (a, b, letter);
-                let entry = Entry { rule, password };
-                Ok(entry)
-            })
+            let captures = re
+                .captures(&line)
+                .ok_or_else(|| anyhow!("Regex match failed"))?;
+            let a = captures[1].parse()?;
+            let b = captures[2].parse()?;
+            let letter = captures[3].chars().next().unwrap();
+            let password = captures[4].to_string();
+            let rule = (a, b, letter);
+            let entry = Entry { rule, password };
+            Ok(entry)
         })
         .collect::<Result<Vec<Entry>>>()?;
 

@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::io::{self, Read};
 
 fn part1(answers: &[Vec<HashSet<char>>]) {
     let answers = answers
@@ -23,12 +22,7 @@ fn part2(answers: &[Vec<HashSet<char>>]) {
 }
 
 fn main() {
-    let mut input = String::new();
-    io::stdin()
-        .read_to_string(&mut input)
-        .expect("Unable to read input");
-
-    let answers = input
+    let answers = include_str!("../input.txt")
         .split("\n\n")
         .map(|group| group.lines().map(|line| line.chars().collect()).collect())
         .collect::<Vec<Vec<HashSet<char>>>>();

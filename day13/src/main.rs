@@ -1,5 +1,3 @@
-use std::io::{self, Read};
-
 use anyhow::{anyhow, Result};
 use num_integer::Integer;
 
@@ -34,10 +32,7 @@ fn part2(busses: &[(i64, i64)]) {
 }
 
 fn main() -> Result<()> {
-    let mut input = String::new();
-    io::stdin().read_to_string(&mut input)?;
-
-    let mut lines = input.lines();
+    let mut lines = include_str!("../input.txt").lines();
     let start_time = lines
         .next()
         .and_then(|l| l.parse().ok())

@@ -1,10 +1,6 @@
-use std::{
-    io::{self, BufRead},
-    ops::Add,
-    str::FromStr,
-};
+use std::{ops::Add, str::FromStr};
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 
 #[derive(Copy, Clone)]
 enum Action {
@@ -131,10 +127,9 @@ fn part2(input: &[Instruction]) {
 }
 
 fn main() -> Result<()> {
-    let input = io::stdin()
-        .lock()
+    let input = include_str!("../input.txt")
         .lines()
-        .map(|line| line.context("Unable to read line").and_then(|l| l.parse()))
+        .map(str::parse)
         .collect::<Result<Vec<Instruction>>>()?;
 
     part1(&input);

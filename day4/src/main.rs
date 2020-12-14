@@ -1,6 +1,6 @@
-use lazy_static::lazy_static;
 use std::collections::{HashMap, HashSet};
-use std::io::{self, Read};
+
+use lazy_static::lazy_static;
 
 type Passport<'a> = HashMap<&'a str, &'a str>;
 
@@ -85,11 +85,7 @@ where
 }
 
 fn main() {
-    let mut input = String::new();
-    io::stdin()
-        .read_to_string(&mut input)
-        .expect("Unable to read input");
-    let entries = input
+    let entries = include_str!("../input.txt")
         .split("\n\n")
         .map(|row| {
             row.trim()

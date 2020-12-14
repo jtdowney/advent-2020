@@ -1,6 +1,4 @@
-use std::io::{self, BufRead};
-use std::num::ParseIntError;
-use std::str::FromStr;
+use std::{num::ParseIntError, str::FromStr};
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 struct BoardingPass(u16);
@@ -41,14 +39,9 @@ fn part2(passes: &[BoardingPass]) {
 }
 
 fn main() {
-    let seat_ids = io::stdin()
-        .lock()
+    let seat_ids = include_str!("../input.txt")
         .lines()
-        .map(|line| {
-            line.expect("Unable to read line")
-                .parse()
-                .expect("Invalid boarding pass")
-        })
+        .map(|line| line.parse().expect("Invalid boarding pass"))
         .collect::<Vec<BoardingPass>>();
 
     part1(&seat_ids);

@@ -1,6 +1,6 @@
-use regex::Regex;
 use std::collections::{HashMap, VecDeque};
-use std::io::Read;
+
+use regex::Regex;
 
 const SEARCH: &str = "shiny gold";
 
@@ -51,14 +51,9 @@ fn part2(rules: &HashMap<&str, Vec<Rule>>) {
 }
 
 fn main() {
-    let mut input = String::new();
-    std::io::stdin()
-        .read_to_string(&mut input)
-        .expect("Unable to read input");
-
     let name_re = Regex::new(r"^(.+) bags contain").expect("Unable to compile regex");
     let rule_re = Regex::new(r"(\d+) (.+?) bags?").expect("Unable to compile regex");
-    let rules = input
+    let rules = include_str!("../input.txt")
         .lines()
         .map(|line| {
             let name_match = name_re.captures(line).expect("name match");

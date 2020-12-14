@@ -1,7 +1,4 @@
-use std::collections::HashMap;
-use std::io::{self, BufRead};
-use std::iter;
-use std::ops::Index;
+use std::{collections::HashMap, iter, ops::Index};
 
 type Point = (usize, usize);
 const ORIGIN: Point = (0, 0);
@@ -68,13 +65,11 @@ fn part2(grid: &Grid) {
 }
 
 fn main() {
-    let pattern = io::stdin()
-        .lock()
+    let pattern = include_str!("../input.txt")
         .lines()
         .enumerate()
         .flat_map(|(y, line)| {
-            let row = line.expect("Failed to read line");
-            row.chars()
+            line.chars()
                 .enumerate()
                 .map(move |(x, ch)| {
                     let square = match ch {

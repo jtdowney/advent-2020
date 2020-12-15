@@ -1,4 +1,4 @@
-use std::{collections::HashMap, iter, result};
+use std::{collections::HashMap, iter};
 
 const SEED: &str = "0,1,5,10,3,12,19";
 
@@ -27,7 +27,7 @@ fn main() {
     let seed = SEED
         .split(',')
         .map(str::parse)
-        .map(result::Result::unwrap)
+        .map(Result::unwrap)
         .enumerate()
         .map(|(i, s)| (s, i))
         .collect::<HashMap<usize, usize>>();

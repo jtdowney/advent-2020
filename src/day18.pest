@@ -1,0 +1,11 @@
+Number = @{ ASCII_DIGIT+ }
+Operation = _{ Add | Multiply }
+    Add      = { "+" }
+    Multiply = { "*" }
+
+Expression = { Term ~ (Operation ~ Term)* }
+Term = _{ Number | "(" ~ Expression ~ ")" }
+
+Calculation = _{ SOI ~ Expression ~ EOI }
+
+WHITESPACE = _{ " " }
